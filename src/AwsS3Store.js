@@ -53,11 +53,11 @@ class AwsS3Store {
   }
 
   async save(options) {
+    console.log('[AWS S3] Save triggered')
     this.debugLog('[METHOD: save] Triggered.');
-
     const remoteFilePath = path.join(this.remoteDataPath, `${options.session}.zip`).replace(/\\/g, '/');
     options.remoteFilePath = remoteFilePath;
-    // await this.#deletePrevious(options);
+    console.log('[AWS S3] Remote file path', remoteFilePath)
 
     const fileStream = fs.createReadStream(`/tmp/${options.session}.zip`);
     const params = {
@@ -65,8 +65,9 @@ class AwsS3Store {
       Key: remoteFilePath,
       Body: fileStream
     };
+    console.log(`[AWS S3] /tmp/${options.session}.zip`)
     await this.s3Client.send(new this.putObjectCommand(params));
-
+    console.log('[AWS S3] Finished save method')
     this.debugLog(`[METHOD: save] File saved. PATH='${remoteFilePath}'.`);
   }
 
