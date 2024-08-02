@@ -37,6 +37,7 @@ class AwsS3Store {
       Bucket: this.bucketName,
       Key: remoteFilePath
     };
+    this.debugLog(`[METHOD: sessionExists] PARAMS='${JSON.stringify(params)}'.`);
     try {
       await this.s3Client.send(new this.headObjectCommand(params));
       this.debugLog(`[METHOD: sessionExists] File found. PATH='${remoteFilePath}'.`);
@@ -53,7 +54,6 @@ class AwsS3Store {
   }
 
   async save(options) {
-    console.log('[AWS S3] Save triggered')
     this.debugLog('[METHOD: save] Triggered.');
     const remoteFilePath = path.join(this.remoteDataPath, `${options.session}.zip`).replace(/\\/g, '/');
     options.remoteFilePath = remoteFilePath;
@@ -65,9 +65,7 @@ class AwsS3Store {
       Key: remoteFilePath,
       Body: fileStream
     };
-    console.log(`[AWS S3] /tmp/${options.session}.zip`)
     await this.s3Client.send(new this.putObjectCommand(params));
-    console.log('[AWS S3] Finished save method')
     this.debugLog(`[METHOD: save] File saved. PATH='${remoteFilePath}'.`);
   }
 
@@ -137,7 +135,7 @@ class AwsS3Store {
   }
 
   debugLog(msg) {
-    if (this.debugEnabled) {
+    if (true) {
       const timestamp = new Date().toISOString();
       console.log(`${timestamp} [STORE_DEBUG] ${msg}`);
     }
