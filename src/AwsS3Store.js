@@ -80,7 +80,11 @@ class AwsS3Store {
     const fileStream = fs.createWriteStream(options.path);
     const response = await this.s3Client.send(new this.getObjectCommand(params));
     console.log('Justo antes del pipe')
-    await response.Body.pipe(fileStream)
+    await new Promise((resolve, reject) => {
+      response.Body.pipe(fileStream)
+        .on('error', reject)
+        .on('finish', resolve);
+    });
 
     this.debugLog(`[METHOD: extract] File extracted. REMOTE_PATH='${remoteFilePath}', LOCAL_PATH='${options.path}'.`);
 
