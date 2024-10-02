@@ -18,5 +18,8 @@
     "s3"
   ],
   "author": "arbisyarifudin",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "unzipper": "^0.12.3"
+  }
 }

@@ -1,5 +1,6 @@
 const path = require('path');
 const fs = require('fs');
+const unzipper = require('unzipper');
 
 class AwsS3Store {
   /**
@@ -78,16 +79,17 @@ class AwsS3Store {
       Key: remoteFilePath
     };
     const fileStream = fs.createWriteStream(options.path);
-    
+  
     try {
       const response = await this.s3Client.send(new this.getObjectCommand(params));
-      
+  
       if (!response.Body) {
         throw new Error('No body found in S3 response');
       }
   
       console.log('Justo antes del pipe');
-      
+  
+      // Esperamos hasta que el archivo se descargue completamente
       await new Promise((resolve, reject) => {
         response.Body.pipe(fileStream)
           .on('error', (err) => {
@@ -101,6 +103,17 @@ class AwsS3Store {
       });
   
       this.debugLog(`[METHOD: extract] File extracted. REMOTE_PATH='${remoteFilePath}', LOCAL_PATH='${options.path}'.`);
+  
+      // Ahora procesamos el archivo zip usando unzipper
+      fs.createReadStream(options.path)
+        .pipe(unzipper.Extract({ path: 'output_path' }))
+        .on('error', (err) => {
+          console.error('Error during unzip', err);
+          throw err;
+        })
+        .on('close', () => {
+          console.log('Unzip completed');
+        });
   
     } catch (err) {
       console.error('Error during extract', err);
