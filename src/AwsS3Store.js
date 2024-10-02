@@ -71,23 +71,41 @@ class AwsS3Store {
 
   async extract(options) {
     this.debugLog('[METHOD: extract] Triggered.');
-
+  
     const remoteFilePath = path.join(this.remoteDataPath, `${options.session}.zip`).replace(/\\/g, '/');
     const params = {
       Bucket: this.bucketName,
       Key: remoteFilePath
     };
     const fileStream = fs.createWriteStream(options.path);
-    const response = await this.s3Client.send(new this.getObjectCommand(params));
-    console.log('Justo antes del pipe')
-    await new Promise((resolve, reject) => {
-      response.Body.pipe(fileStream)
-        .on('error', reject)
-        .on('finish', resolve);
-    });
-
-    this.debugLog(`[METHOD: extract] File extracted. REMOTE_PATH='${remoteFilePath}', LOCAL_PATH='${options.path}'.`);
-
+    
+    try {
+      const response = await this.s3Client.send(new this.getObjectCommand(params));
+      
+      if (!response.Body) {
+        throw new Error('No body found in S3 response');
+      }
+  
+      console.log('Justo antes del pipe');
+      
+      await new Promise((resolve, reject) => {
+        response.Body.pipe(fileStream)
+          .on('error', (err) => {
+            console.error('Error during file writing', err);
+            reject(err);
+          })
+          .on('finish', () => {
+            console.log('File successfully written');
+            resolve();
+          });
+      });
+  
+      this.debugLog(`[METHOD: extract] File extracted. REMOTE_PATH='${remoteFilePath}', LOCAL_PATH='${options.path}'.`);
+  
+    } catch (err) {
+      console.error('Error during extract', err);
+      throw err;
+    }
   }
 
   async delete(options) {
