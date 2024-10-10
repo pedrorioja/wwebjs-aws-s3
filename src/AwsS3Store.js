@@ -124,24 +124,24 @@ class AwsS3Store {
   async delete(options) {
     this.debugLog('[METHOD: delete] Triggered.');
 
-    const remoteFilePath = path.join(this.remoteDataPath, `${options.session}.zip`).replace(/\\/g, '/');
-    const params = {
-      Bucket: this.bucketName,
-      Key: remoteFilePath
-    };
-    try {
-      await this.s3Client.send(new this.headObjectCommand(params));
-      await this.s3Client.send(new this.deleteObjectCommand(params));
-      this.debugLog(`[METHOD: delete] File deleted. PATH='${remoteFilePath}'.`);
-    } catch (err) {
-      if (err.name === 'NoSuchKey' || err.name === 'NotFound') {
-        this.debugLog(`[METHOD: delete] File not found. PATH='${remoteFilePath}'.`);
-        return;
-      } 
-      this.debugLog(`[METHOD: delete] Error: ${err.message}`);
-      // throw err;
-      return
-    }
+    // const remoteFilePath = path.join(this.remoteDataPath, `${options.session}.zip`).replace(/\\/g, '/');
+    // const params = {
+    //   Bucket: this.bucketName,
+    //   Key: remoteFilePath
+    // };
+    // try {
+    //   await this.s3Client.send(new this.headObjectCommand(params));
+    //   await this.s3Client.send(new this.deleteObjectCommand(params));
+    //   this.debugLog(`[METHOD: delete] File deleted. PATH='${remoteFilePath}'.`);
+    // } catch (err) {
+    //   if (err.name === 'NoSuchKey' || err.name === 'NotFound') {
+    //     this.debugLog(`[METHOD: delete] File not found. PATH='${remoteFilePath}'.`);
+    //     return;
+    //   } 
+    //   this.debugLog(`[METHOD: delete] Error: ${err.message}`);
+    //   // throw err;
+    //   return
+    // }
   }
 
   async #deletePrevious(options) {
